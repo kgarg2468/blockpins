@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chapman BlockPins
 
-## Getting Started
+Minimal demo app: sign in with email/password, open a Mapbox map centered on Chapman University, click to add a title/note pin, and persist pins in Supabase.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router + TypeScript
+- Supabase (Auth + Postgres)
+- Mapbox GL JS
+- Framer Motion
+- Vercel deployment target
+
+## Local Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Copy env template:
+
+```bash
+cp .env.example .env.local
+```
+
+3. Fill `.env.local`:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
+
+4. Run Supabase SQL in your Supabase SQL Editor:
+
+- [supabase/schema.sql](./supabase/schema.sql)
+
+5. Start dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Behavior Implemented
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Email/password sign up + sign in
+- Auth gate before map access
+- Map centered at Chapman (`33.7933, -117.8513`)
+- Click map to stage a pin
+- Pin form with validation (`title <= 80`, `note <= 280`)
+- Save pin to Supabase, then refetch pins
+- Pins list sorted newest first
+- Click list item or map marker to view pin info
+- Collapsible desktop panel + mobile drawer
+- Session persistence across reloads via Supabase auth session
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+```bash
+npm run dev
+npm run lint
+npm run test
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy to Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Push this repo to GitHub.
+2. Import project in Vercel.
+3. Set environment variables in Vercel project settings:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
+4. Deploy.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Mapbox token recommendation
 
-## Deploy on Vercel
+Restrict your public token by domain in Mapbox token settings (for example your Vercel production domain and preview domain).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Testing Notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Current automated tests cover:
+
+- Pin input validation rules
+- Newest-first pin sorting
+- Chapman map defaults
+- Save-then-refetch workflow behavior
+
+RLS ownership behavior should be verified in Supabase with two users (user A cannot read user B pins).
